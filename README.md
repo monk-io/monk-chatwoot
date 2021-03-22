@@ -6,6 +6,18 @@ This repository contains Monk.io template to deploy Chatwoot system either local
 
 This template is available directly from Monkhub.io therefore if you want a quick deploy simply run below command after launching `monkd`:
 ```
+➜  monk-polygon git:(fix/add-rabbitmq) ✗ monk login
+
+➜  monk-polygon git:(fix/add-rabbitmq) ✗ monk list chatwoot
+✔ Got the list
+Type      Template           Repository  Version  Tags
+runnable  chatwoot/chatwoot  monk        latest   self hosted, messaging, communication
+runnable  chatwoot/mailhog   monk        latest   smtp, email
+runnable  chatwoot/postgres  monk        12       dataops, database
+runnable  chatwoot/redis     monk        alpine   -
+runnable  chatwoot/sidekiq   monk        latest   self hosted, messaging, communication
+group     chatwoot/stack     monk        latest   self hosted, messaging, communication
+
 ➜  monk-chatwoot git:(main) ✗ monk run chatwoot/stack
 
 ✔ Started chatwoot2/stack
