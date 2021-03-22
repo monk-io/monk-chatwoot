@@ -2,13 +2,21 @@
 
 This repository contains Monk.io template to deploy Chatwoot system either locally or on cloud of your choice (AWS, GCP, Azure, Digital Ocean).
 
+## Start 
+
+Setup Monk - https://docs.monk.io/monk-in-10/
+
+Start `monkd -d` and login.
+
+```bash
+monk login --email=<email> --password=<password>
+```
+
 ## Local Deployment
 
 This template is available directly from Monkhub.io therefore if you want a quick deploy simply run below command after launching `monkd`:
-```
-➜  monk-polygon git:(fix/add-rabbitmq) ✗ monk login
-
-➜  monk-polygon git:(fix/add-rabbitmq) ✗ monk list chatwoot
+```bash
+➜  monk list chatwoot
 ✔ Got the list
 Type      Template           Repository  Version  Tags
 runnable  chatwoot/chatwoot  monk        latest   self hosted, messaging, communication
@@ -18,7 +26,7 @@ runnable  chatwoot/redis     monk        alpine   -
 runnable  chatwoot/sidekiq   monk        latest   self hosted, messaging, communication
 group     chatwoot/stack     monk        latest   self hosted, messaging, communication
 
-➜  monk-chatwoot git:(main) ✗ monk run chatwoot/stack
+➜  monk run chatwoot/stack
 
 ✔ Started chatwoot2/stack
 
@@ -47,18 +55,18 @@ group     chatwoot/stack     monk        latest   self hosted, messaging, commun
 
 ## Cloud Deployment
 To deploy the above system to your cloud provider, create a new Monk cluster and provision your instances.
-```
-➜  monk-chatwoot git:(main) ✗ monk cluster new                                     
+```bash
+➜  monk cluster new                                     
 ? New cluster name chatwoot-deployment
 ✔ Cluster created
 Your cluster has been created successfully.
 
-➜  monk-chatwoot git:(main) ✗ monk cluster provider add
+➜  monk cluster provider add
 ? Cloud provider gcp
 ? GOOGLE_APPLICATION_CREDENTIALS is set. Try load it? Yes
 ✔ Provider added successfully
 
-➜  monk-chatwoot git:(main) ✗ monk cluster grow -p gcp
+➜  monk cluster grow -p gcp
 ? Name for the new instance my-instance
 ? Tags (split by whitespace) chatwoot
 ? Instance region (gcp) europe-west2
@@ -71,8 +79,8 @@ Your cluster has been created successfully.
 ✔ Cluster grown successfully
 ```
 Once cluster is ready execute the same command as for local and select your cluster (the option will appear automatically).
-```
-➜  monk-chatwoot git:(main) ✗ monk run chatwoot/stack
+```bash
+➜  monk run chatwoot/stack
 ? Select tag to run on: chatwoot
 ```
 
@@ -80,7 +88,7 @@ Once cluster is ready execute the same command as for local and select your clus
 You can add/remove or override current configuration of the template or create a brand new one which could inherit the components that you require.
 
 The current variables can be found in `chatwoot/common/variables` and `chatwoot/postgres` section
-```
+```bash
   variables:
     defines: variables
     secret-key-base: 3beeee45bc938475ecba45075c53aae0f94299a83f824b25bbaf7965b4b0c60ff2b0c66c9047a026578deb5ecadabaa602891be2be66ed123a7b26876d4daddf
@@ -101,7 +109,7 @@ postgres:
     db-port: 5432
 ```
 To override the settings or add new ones for your own template you can inherit it in this way:
-```
+```bash
 my-chatwoot:
   defines: runnable
   inherits: /chatwoot/chatwoot
@@ -110,7 +118,7 @@ my-chatwoot:
 ```
 
 ### Logs & Shell
-```
+```bash
 ➜  monk logs -l 1000 -f chatwoot/chatwoot
 
 ➜  monk shell chatwoot/chatwoot
