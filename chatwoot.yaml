@@ -1,5 +1,81 @@
 namespace: /chatwoot
 
+nginx:
+  defines: runnable
+  inherits: /nginx/reverse-proxy-ssl-certbot
+  variables:
+    proxy-pass-protocol: http
+    chatwoot-url: <- get-hostname("chatwoot/chatwoot", "rails")
+    chatwoot-port: 3000
+    server-name: chat.yoursite.io
+    email: chat@yoursite.io
+    ssl: true
+  files:
+    defines: files
+    server-def:
+      contents: |
+        server {
+          underscores_in_headers on;
+          listen 80;
+          server_name {{ v "server-name" }} www.{{ v "server-name" }};
+          {{ if v "ssl" }}
+          location /.well-known/acme-challenge/ {
+            root /var/www/certbot;
+          }
+          {{ end }}
+          
+          proxy_pass_request_headers on;
+          proxy_http_version 1.1;
+          proxy_set_header X-Forwarded-Host $host;
+          proxy_set_header X-Forwarded-Server $host;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header Host $host;
+          
+          location / {
+            {{ if v "ssl" }}
+            return 301 https://{{ v "server-name" }}$request_uri;
+            {{ else }}
+            proxy_pass {{ v "proxy-pass-protocol" }}://{{ v "chatwoot-url" }}:{{ v "chatwoot-port" }};
+            {{ end }}
+          }
+        }
+        {{ if v "ssl" }}
+        server {
+          underscores_in_headers on;
+          listen 443 ssl;
+          server_name {{ v "server-name" }} www.{{ v "server-name" }};
+          ssl_certificate /usr/share/nginx/certificates/fullchain.pem;
+          ssl_certificate_key /usr/share/nginx/certificates/privkey.pem;
+          include /etc/ssl-options/options-nginx-ssl.conf;
+          ssl_dhparam /etc/ssl-options/ssl-dhparams.pem;
+
+          proxy_pass_request_headers on;
+          proxy_http_version 1.1;
+          proxy_set_header X-Forwarded-Host $host;
+          proxy_set_header X-Forwarded-Server $host;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header Host $host;
+
+          location /cable {
+          proxy_pass {{ v "proxy-pass-protocol" }}://{{ v "chatwoot-url" }}:{{ v "chatwoot-port" }}/cable;
+          proxy_http_version 1.1;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header Host $http_host;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "Upgrade";
+          }
+          
+          location / {
+            proxy_pass {{ v "proxy-pass-protocol" }}://{{ v "chatwoot-url" }}:{{ v "chatwoot-port" }};
+          }
+        } 
+        {{ end }}
+
+
 common:
   version: latest
   metadata:
@@ -11,7 +87,7 @@ common:
     source: https://github.com/chatwoot/chatwoot
     publisher: "monk.io"
     icon: https://storage.googleapis.com/template_logos/chatwoot-image.png
-
+    email: maciej@monk.io
   containers:
     defines: containers
     rails:
@@ -32,30 +108,42 @@ common:
         - <- `SMTP_PASSWORD=${smtp-password}`
   variables:
     defines: variables
-    secret-key-base: 3beeee45bc938475ecba45075c53aae0f94299a83f824b25bbaf7965b4b0c60ff2b0c66c9047a026578deb5ecadabaa602891be2be66ed123a7b26876d4daddf
+    secret-key-base: 3bsefe45bc938475ecba45075c53cdf0f94299a23f821b05beaf7955b4b0c60ff2b0c66c9047a026578deb5ecadabgs342891be2be68ed123a7b26876d4daddf
     db-user: postgres
-    db-password: password
+    db-password: "CHANGE_ME"
     db-port: 5432
     smtp-user: ""
     smtp-password: ""
     smtp-port: 1025
-
+    redis-password:
+      env: REDIS_PASSWORD
+      value: "CHANGE_ME"
+    sidekiq_auth_username:
+      env: SIDEKIQ_AUTH_USERNAME
+      value: "chat@yoursite.io"
+    sidekiq_auth_password:
+      env: SIDEKIQ_AUTH_PASSWORD
+      value: "CHANGE_ME"
     db-host: <- get-hostname("chatwoot/postgres", "postgres")
     redis-host: <- get-hostname("chatwoot/redis", "redis")
     smtp-host: <- get-hostname("chatwoot/mailhog", "mailhog")
 
 postgres:
   defines: runnable
-  inherits: /postgres/12
+  inherits: /postgres-chatwoot/12
   variables:
     db-name: chatwoot_production
     db-user: postgres
-    db-password: password
+    db-password: "CHANGE_ME"
     db-port: 5432
 
 redis:
   defines: runnable
-  inherits: /redis/alpine
+  inherits: /redis-chatwoot/alpine
+  containers:
+    defines: containers
+    redis:
+      entrypoint: <- `redis-server --requirepass CHANGE_ME`
 
 chatwoot:
   defines: runnable
@@ -64,7 +152,7 @@ chatwoot:
     rails:
       entrypoint: <- `/bin/sh /init.sh`
       ports:
-        - 0.0.0.0:3000:3000
+        - 3000
   files:
     defines: files
     init:
@@ -73,13 +161,52 @@ chatwoot:
       contents: | 
         bundle exec rails db:chatwoot_prepare RAILS_ENV=production 
         bundle exec rails s -p 3000 -b 0.0.0.0
-  depends:
-    defines: depends
-    wait-for:
-      runnables:
-        - /chatwoot/postgres
-        - /chatwoot/redis
-      timeout: 60
+    prod-config:
+      path: '/app/config/environments/production.rb'
+      container: rails
+      contents: |
+        Rails.application.configure do
+        config.cache_classes = true
+        config.eager_load = true
+        config.consider_all_requests_local       = false
+        config.action_controller.perform_caching = true
+        config.public_file_server.enabled = ActiveModel::Type::Boolean.new.cast(ENV.fetch('RAILS_SERVE_STATIC_FILES', true))
+        config.assets.compile = false
+        config.action_controller.asset_host = ENV.fetch('ASSET_CDN_HOST') if ENV['ASSET_CDN_HOST'].present?
+        config.active_storage.service = ENV.fetch('ACTIVE_STORAGE_SERVICE', 'local').to_sym
+        if ENV['FRONTEND_URL'].present?
+        config.action_cable.allowed_request_origins = [ENV['FRONTEND_URL'], %r{https?://#{URI.parse(ENV['FRONTEND_URL']).host}(:[0-9]+)?}]
+        end
+        config.force_ssl = ActiveModel::Type::Boolean.new.cast(ENV.fetch('FORCE_SSL', false))
+        config.log_level = ENV.fetch('LOG_LEVEL', 'info').to_sym
+        config.log_tags = [:request_id]
+        config.active_job.queue_adapter = :sidekiq
+        config.i18n.fallbacks = [I18n.default_locale]
+        config.active_support.deprecation = :notify
+        config.log_formatter = ::Logger::Formatter.new
+        if ActiveModel::Type::Boolean.new.cast(ENV.fetch('RAILS_LOG_TO_STDOUT', true))
+        logger           = ActiveSupport::Logger.new($stdout)
+        logger.formatter = config.log_formatter
+        config.logger    = ActiveSupport::TaggedLogging.new(logger)
+        else
+        config.logger    = ActiveSupport::Logger.new(
+        Rails.root.join("log/#{Rails.env}.log"),
+        1,
+        ENV.fetch('LOG_SIZE', '1024').to_i.megabytes
+        )
+        end
+        config.active_record.dump_schema_after_migration = false
+        config.action_mailer.perform_caching = false
+        config.action_mailbox.ingress = ENV.fetch('RAILS_INBOUND_EMAIL_SERVICE', 'relay').to_sym
+        Rails.application.routes.default_url_options = { host: ENV['FRONTEND_URL'] }
+        config.middleware.insert_before 0, Rack::Cors do
+        allow do
+        origins '*'
+        resource '/packs/*', headers: :any, methods: [:get, :options]
+        end
+        end
+        config.action_cable.allowed_request_origins = ['https://chat.yoursite.io', 'http://chat.yoursite.io']
+        end
 
 sidekiq:
   defines: runnable
@@ -117,17 +244,17 @@ sidekiq:
           :concurrency: 10
         staging:
           :concurrency: 5
-  depends:
-    defines: depends
-    wait-for:
-      runnables:
-        - /chatwoot/postgres
-        - /chatwoot/redis
-      timeout: 60
 
 mailhog:
   defines: runnable
   inherits: /mailhog/latest
+  containers:
+    defines: containers
+    mailhog:
+      image: mailhog/mailhog:latest
+      ports:
+        - 1025
+        - 8025
 
 stack:
   defines: process-group
@@ -148,3 +275,4 @@ stack:
     - /chatwoot/sidekiq
     - /chatwoot/chatwoot
     - /chatwoot/mailhog
+    - /chatwoot/nginx

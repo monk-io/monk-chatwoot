@@ -1,0 +1,25 @@
+namespace: /redis-chatwoot
+
+common:
+  metadata:
+    defines: metadata
+    name: Redis
+    description: Redis is an in-memory database that persists on disk.
+    website: https://redis.io
+    source: https://github.com/redis/redis
+    publisher: "monk.io"
+    icon: https://storage.googleapis.com/template_logos/png-transparent-redis-in-memory-database-key-value-database-cache-speech-miscellaneous-logo-data.png
+    email: maciej@monk.io
+  containers:
+    defines: containers
+    redis:
+      image: docker.io/redis:alpine
+      paths:
+        - <- `${moncc-volume-path}/redis:/data`
+
+alpine:
+  defines: runnable
+  version: alpine
+  inherits: ./common
+  variables:
+    image-tag: alpine
