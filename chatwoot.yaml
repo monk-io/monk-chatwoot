@@ -244,9 +244,9 @@ stack:
     redis-password:
       env: REDIS_PASSWORD
       value: "CHANGE_ME"
-    sidekiq_auth_username:
+    sidekiq-auth-username:
       env: SIDEKIQ_AUTH_USERNAME
       value: "chat@yoursite.io"
-    sidekiq_auth_password:
+    sidekiq-auth-password:
       env: SIDEKIQ_AUTH_PASSWORD
       value: "CHANGE_ME"
