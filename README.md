@@ -87,34 +87,72 @@ Once cluster is ready execute the same command as for local and select your clus
 ## Configuration
 You can add/remove or override current configuration of the template or create a brand new one which could inherit the components that you require.
 
-The current variables can be found in `chatwoot/common/variables` and `chatwoot/postgres` section
+The current variables can be found in `chatwoot/stack/variables` section
 ```bash
   variables:
     defines: variables
-    secret-key-base: 3beeee45bc938475ecba45075c53aae0f94299a83f824b25bbaf7965b4b0c60ff2b0c66c9047a026578deb5ecadabaa602891be2be66ed123a7b26876d4daddf
-    db-user: postgres
-    db-password: password
+    proxy-pass-protocol: http
+    chatwoot-port: 3000
+    server-name: chat.yoursite.io
+    email: chat@yoursite.io
+    ssl: true
+    frontend-url:
+      env: FRONTEND_URL
+      value: http://0.0.0.0:3000
+    rails-env:
+      env: RAILS_ENV
+      value: production
+    secret-key-base:
+      env: SECRET_KEY_BASE
+      value: 3bsefe45bc938475ecba45075c53cdf0f94299a23f821b05beaf7955b4b0c60ff2b0c66c9047a026578deb5ecadabgs342891be2be68ed123a7b26876d4daddf
+    db-user:
+      env: POSTGRES_USERNAME
+      value: postgres
+    db-password:
+      env: POSTGRES_PASSWORD
+      value: "CHANGE_ME"
     db-port: 5432
-    smtp-user: ""
-    smtp-password: ""
-    smtp-port: 1025
-
-postgres:
-  defines: runnable
-  inherits: /postgres/12
-  variables:
-    db-name: chatwoot_production
-    db-user: postgres
-    db-password: password
-    db-port: 5432
+    smtp-username:
+      env: SMTP_USERNAME
+      value: "chat@yoursite.io"
+    smtp-password:
+      env: SMTP_PASSWORD
+      value: "CHANGE_ME"
+    smtp-port:
+      env: SMTP_PORT
+      value: 1025
+    smtp-address:
+      env: SMTP_ADDRESS
+      value: "SMTP_HOST"
+    redis-password:
+      env: REDIS_PASSWORD
+      value: "CHANGE_ME"
+    sidekiq-auth-username:
+      env: SIDEKIQ_AUTH_USERNAME
+      value: "chat@yoursite.io"
+    sidekiq-auth-password:
+      env: SIDEKIQ_AUTH_PASSWORD
+      value: "CHANGE_ME"
 ```
 To override the settings or add new ones for your own template you can inherit it in this way:
 ```bash
-my-chatwoot:
-  defines: runnable
-  inherits: /chatwoot/chatwoot
+namespace: my-chatwoot
+
+chatwoot-prod:
+  defines: process-group
+  inherits: chatwoot/stack
   variables:
-    db-user: my-postgres-user
+    server-name: chat.my-domain.io
+    db-user: postgres
+    db-password: my-postgres-pass
+    db-port: 5432
+    smtp-username: chat@my-domain.io
+    smtp-password: my-smtp-pass
+    smtp-port: 1025
+    smtp-address: smtp.my-domain.io
+    redis-password: my-redis-pass
+    sidekiq-auth-username: my-sidekiq-auth-username
+    sidekiq-auth-password: my-sidekiq-auth-password
 ```
 
 ### Logs & Shell
