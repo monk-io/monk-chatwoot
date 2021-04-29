@@ -102,6 +102,7 @@ common:
         - <- `SMTP_USERNAME=${smtp-username}`
         - <- `SMTP_PASSWORD=${smtp-password}`
         - <- `REDIS_PASSWORD=${redis-password}`
+        - <- `FRONTEND_URL=${server-name}`
   variables:
     defines: variables
     db-host: <- get-hostname("chatwoot/postgres", "postgres")
@@ -134,7 +135,7 @@ chatwoot:
     rails:
       entrypoint: <- `/bin/sh /init.sh`
       ports:
-        - "0.0.0.0:3000:3000"
+        - 3000
   depends:
     defines: depends
     wait-for:
@@ -190,22 +191,12 @@ sidekiq:
 stack:
   defines: process-group
   version: latest
-  metadata:
-    defines: metadata
-    name: Chatwoot
-    description: Open-source live chat software, an alternative to Intercom, Zendesk, Salesforce Service Cloud etc. 🔥💬
-    tags: self hosted, messaging, communication
-    website: www.chatwoot.com
-    source: https://github.com/chatwoot/chatwoot
-    publisher: "monk.io"
-    icon: https://storage.googleapis.com/template_logos/chatwoot-image.png
-    email: maciej@monk.io
   runnable-list:
     - /chatwoot/redis
     - /chatwoot/postgres
     - /chatwoot/sidekiq
     - /chatwoot/chatwoot
-  #  - /chatwoot/nginx
+    - /chatwoot/nginx
   variables:
     defines: variables
     proxy-pass-protocol: http
@@ -213,9 +204,6 @@ stack:
     server-name: chat.yoursite.io
     email: chat@yoursite.io
     ssl: true
-    frontend-url:
-      env: FRONTEND_URL
-      value: http://0.0.0.0:3000
     rails-env:
       env: RAILS_ENV
       value: production
