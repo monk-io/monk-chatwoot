@@ -4,12 +4,8 @@ nginx:
   defines: runnable
   inherits: /nginx/reverse-proxy-ssl-certbot
   variables:
-    proxy-pass-protocol: http
+    defines: variables
     chatwoot-url: <- get-hostname("chatwoot/chatwoot", "rails")
-    chatwoot-port: 3000
-    server-name: chat.yoursite.io
-    email: chat@yoursite.io
-    ssl: true
   files:
     defines: files
     server-def:
@@ -96,49 +92,21 @@ common:
         - NODE_ENV=production
         - DEFAULT_LOCALE=en
         - <- `REDIS_URL=redis://${redis-host}:6379`
+        - <- `SECRET_KEY_BASE=${secret-key-base}`
+        - <- `REDIS_URL=redis://${redis-host}:6379`
+        - <- `POSTGRES_HOST=${db-host}`
+        - <- `POSTGRES_USERNAME=${db-user}`
+        - <- `POSTGRES_PASSWORD=${db-password}`
+        - <- `SMTP_ADDRESS=${smtp-address}`
+        - <- `SMTP_PORT=${smtp-port}`
+        - <- `SMTP_USERNAME=${smtp-username}`
+        - <- `SMTP_PASSWORD=${smtp-password}`
+        - <- `REDIS_PASSWORD=${redis-password}`
   variables:
     defines: variables
-    frontend-url:
-      env: FRONTEND_URL
-      value: http://0.0.0.0:3000
-    rails-env:
-      env: RAILS_ENV
-      value: production
-    secret-key-base:
-      env: SECRET_KEY_BASE
-      value: 3bsefe45bc938475ecba45075c53cdf0f94299a23f821b05beaf7955b4b0c60ff2b0c66c9047a026578deb5ecadabgs342891be2be68ed123a7b26876d4daddf
-    db-host:
-      env: POSTGRES_HOST
-      value: <- get-hostname("chatwoot/postgres", "postgres")
-    db-user:
-      env: POSTGRES_USERNAME
-      value: postgres
-    db-password:
-      env: POSTGRES_PASSWORD
-      value: "CHANGE_ME"
-    db-port: 5432
-    smtp-username:
-      env: SMTP_USERNAME
-      value: "chat@yoursite.io"
-    smtp-password:
-      env: SMTP_PASSWORD
-      value: "CHANGE_ME"
-    smtp-port:
-      env: SMTP_PORT
-      value: 1025
-    smtp-address:
-      env: SMTP_ADDRESS
-      value: "SMTP_HOST"
-    redis-password:
-      env: REDIS_PASSWORD
-      value: "CHANGE_ME"
-    sidekiq_auth_username:
-      env: SIDEKIQ_AUTH_USERNAME
-      value: "chat@yoursite.io"
-    sidekiq_auth_password:
-      env: SIDEKIQ_AUTH_PASSWORD
-      value: "CHANGE_ME"
+    db-host: <- get-hostname("chatwoot/postgres", "postgres")
     redis-host: <- get-hostname("chatwoot/redis", "redis")
+    chatwoot-url: <- get-hostname("chatwoot/chatwoot", "rails")
 
 postgres:
   defines: runnable
@@ -148,11 +116,6 @@ postgres:
     postgres:
       ports:
         - 5432
-  variables:
-    db-name: chatwoot_production
-    db-user: postgres
-    db-password: password
-    db-port: 5432
 
 redis:
   defines: runnable
@@ -171,7 +134,7 @@ chatwoot:
     rails:
       entrypoint: <- `/bin/sh /init.sh`
       ports:
-        - 3000
+        - "0.0.0.0:3000:3000"
   depends:
     defines: depends
     wait-for:
@@ -242,4 +205,48 @@ stack:
     - /chatwoot/postgres
     - /chatwoot/sidekiq
     - /chatwoot/chatwoot
-    - /chatwoot/nginx
+  #  - /chatwoot/nginx
+  variables:
+    defines: variables
+    proxy-pass-protocol: http
+    chatwoot-port: 3000
+    server-name: chat.yoursite.io
+    email: chat@yoursite.io
+    ssl: true
+    frontend-url:
+      env: FRONTEND_URL
+      value: http://0.0.0.0:3000
+    rails-env:
+      env: RAILS_ENV
+      value: production
+    secret-key-base:
+      env: SECRET_KEY_BASE
+      value: 3bsefe45bc938475ecba45075c53cdf0f94299a23f821b05beaf7955b4b0c60ff2b0c66c9047a026578deb5ecadabgs342891be2be68ed123a7b26876d4daddf
+    db-user:
+      env: POSTGRES_USERNAME
+      value: postgres
+    db-password:
+      env: POSTGRES_PASSWORD
+      value: "CHANGE_ME"
+    db-port: 5432
+    smtp-username:
+      env: SMTP_USERNAME
+      value: "chat@yoursite.io"
+    smtp-password:
+      env: SMTP_PASSWORD
+      value: "CHANGE_ME"
+    smtp-port:
+      env: SMTP_PORT
+      value: 1025
+    smtp-address:
+      env: SMTP_ADDRESS
+      value: "SMTP_HOST"
+    redis-password:
+      env: REDIS_PASSWORD
+      value: "CHANGE_ME"
+    sidekiq_auth_username:
+      env: SIDEKIQ_AUTH_USERNAME
+      value: "chat@yoursite.io"
+    sidekiq_auth_password:
+      env: SIDEKIQ_AUTH_PASSWORD
+      value: "CHANGE_ME"
