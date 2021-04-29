@@ -171,12 +171,11 @@ chatwoot:
     rails:
       entrypoint: <- `/bin/sh /init.sh`
       ports:
-        - "0.0.0.0:3000:3000"
+        - 3000
   depends:
     defines: depends
     wait-for:
       runnables:
-        - chatwoot/redis
         - chatwoot/postgres
       timeout: 60
   files:
@@ -243,4 +242,4 @@ stack:
     - /chatwoot/postgres
     - /chatwoot/sidekiq
     - /chatwoot/chatwoot
-#    - /chatwoot/nginx
+    - /chatwoot/nginx
