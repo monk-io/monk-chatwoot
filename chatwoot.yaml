@@ -94,27 +94,41 @@ common:
       image: chatwoot/chatwoot:latest
       environment:
         - NODE_ENV=production
-        - RAILS_ENV=production
         - DEFAULT_LOCALE=en
-        - FRONTEND_URL=http://0.0.0.0:3000
-        - <- `SECRET_KEY_BASE=${secret-key-base}`
         - <- `REDIS_URL=redis://${redis-host}:6379`
-        - <- `POSTGRES_HOST=${db-host}`
-        - <- `POSTGRES_USERNAME=${db-user}`
-        - <- `POSTGRES_PASSWORD=${db-password}`
-        - <- `SMTP_ADDRESS=${smtp-host}`
-        - <- `SMTP_PORT=${smtp-port}`
-        - <- `SMTP_USERNAME=${smtp-user}`
-        - <- `SMTP_PASSWORD=${smtp-password}`
   variables:
     defines: variables
-    secret-key-base: 3bsefe45bc938475ecba45075c53cdf0f94299a23f821b05beaf7955b4b0c60ff2b0c66c9047a026578deb5ecadabgs342891be2be68ed123a7b26876d4daddf
-    db-user: postgres
-    db-password: "CHANGE_ME"
+    frontend-url:
+      env: FRONTEND_URL
+      value: http://0.0.0.0:3000
+    rails-env:
+      env: RAILS_ENV
+      value: production
+    secret-key-base:
+      env: SECRET_KEY_BASE
+      value: 3bsefe45bc938475ecba45075c53cdf0f94299a23f821b05beaf7955b4b0c60ff2b0c66c9047a026578deb5ecadabgs342891be2be68ed123a7b26876d4daddf
+    db-host:
+      env: POSTGRES_HOST
+      value: <- get-hostname("chatwoot/postgres", "postgres")
+    db-user:
+      env: POSTGRES_USERNAME
+      value: postgres
+    db-password:
+      env: POSTGRES_PASSWORD
+      value: "CHANGE_ME"
     db-port: 5432
-    smtp-user: ""
-    smtp-password: ""
-    smtp-port: 1025
+    smtp-username:
+      env: SMTP_USERNAME
+      value: "chat@yoursite.io"
+    smtp-password:
+      env: SMTP_PASSWORD
+      value: "CHANGE_ME"
+    smtp-port:
+      env: SMTP_PORT
+      value: 1025
+    smtp-address:
+      env: SMTP_ADDRESS
+      value: "SMTP_HOST"
     redis-password:
       env: REDIS_PASSWORD
       value: "CHANGE_ME"
@@ -124,26 +138,31 @@ common:
     sidekiq_auth_password:
       env: SIDEKIQ_AUTH_PASSWORD
       value: "CHANGE_ME"
-    db-host: <- get-hostname("chatwoot/postgres", "postgres")
     redis-host: <- get-hostname("chatwoot/redis", "redis")
-    smtp-host: <- get-hostname("chatwoot/mailhog", "mailhog")
 
 postgres:
   defines: runnable
-  inherits: /postgres-chatwoot/12
+  inherits: /postgres/12
+  containers:
+    defines: containers
+    postgres:
+      ports:
+        - 5432
   variables:
     db-name: chatwoot_production
     db-user: postgres
-    db-password: "CHANGE_ME"
+    db-password: password
     db-port: 5432
 
 redis:
   defines: runnable
-  inherits: /redis-chatwoot/alpine
+  inherits: /redis/alpine
   containers:
     defines: containers
     redis:
       entrypoint: <- `redis-server --requirepass CHANGE_ME`
+      ports:
+        - 6379
 
 chatwoot:
   defines: runnable
@@ -152,7 +171,14 @@ chatwoot:
     rails:
       entrypoint: <- `/bin/sh /init.sh`
       ports:
-        - 3000
+        - "0.0.0.0:3000:3000"
+  depends:
+    defines: depends
+    wait-for:
+      runnables:
+        - chatwoot/redis
+        - chatwoot/postgres
+      timeout: 60
   files:
     defines: files
     init:
@@ -161,52 +187,6 @@ chatwoot:
       contents: | 
         bundle exec rails db:chatwoot_prepare RAILS_ENV=production 
         bundle exec rails s -p 3000 -b 0.0.0.0
-    prod-config:
-      path: '/app/config/environments/production.rb'
-      container: rails
-      contents: |
-        Rails.application.configure do
-        config.cache_classes = true
-        config.eager_load = true
-        config.consider_all_requests_local       = false
-        config.action_controller.perform_caching = true
-        config.public_file_server.enabled = ActiveModel::Type::Boolean.new.cast(ENV.fetch('RAILS_SERVE_STATIC_FILES', true))
-        config.assets.compile = false
-        config.action_controller.asset_host = ENV.fetch('ASSET_CDN_HOST') if ENV['ASSET_CDN_HOST'].present?
-        config.active_storage.service = ENV.fetch('ACTIVE_STORAGE_SERVICE', 'local').to_sym
-        if ENV['FRONTEND_URL'].present?
-        config.action_cable.allowed_request_origins = [ENV['FRONTEND_URL'], %r{https?://#{URI.parse(ENV['FRONTEND_URL']).host}(:[0-9]+)?}]
-        end
-        config.force_ssl = ActiveModel::Type::Boolean.new.cast(ENV.fetch('FORCE_SSL', false))
-        config.log_level = ENV.fetch('LOG_LEVEL', 'info').to_sym
-        config.log_tags = [:request_id]
-        config.active_job.queue_adapter = :sidekiq
-        config.i18n.fallbacks = [I18n.default_locale]
-        config.active_support.deprecation = :notify
-        config.log_formatter = ::Logger::Formatter.new
-        if ActiveModel::Type::Boolean.new.cast(ENV.fetch('RAILS_LOG_TO_STDOUT', true))
-        logger           = ActiveSupport::Logger.new($stdout)
-        logger.formatter = config.log_formatter
-        config.logger    = ActiveSupport::TaggedLogging.new(logger)
-        else
-        config.logger    = ActiveSupport::Logger.new(
-        Rails.root.join("log/#{Rails.env}.log"),
-        1,
-        ENV.fetch('LOG_SIZE', '1024').to_i.megabytes
-        )
-        end
-        config.active_record.dump_schema_after_migration = false
-        config.action_mailer.perform_caching = false
-        config.action_mailbox.ingress = ENV.fetch('RAILS_INBOUND_EMAIL_SERVICE', 'relay').to_sym
-        Rails.application.routes.default_url_options = { host: ENV['FRONTEND_URL'] }
-        config.middleware.insert_before 0, Rack::Cors do
-        allow do
-        origins '*'
-        resource '/packs/*', headers: :any, methods: [:get, :options]
-        end
-        end
-        config.action_cable.allowed_request_origins = ['https://chat.yoursite.io', 'http://chat.yoursite.io']
-        end
 
 sidekiq:
   defines: runnable
@@ -245,17 +225,6 @@ sidekiq:
         staging:
           :concurrency: 5
 
-mailhog:
-  defines: runnable
-  inherits: /mailhog/latest
-  containers:
-    defines: containers
-    mailhog:
-      image: mailhog/mailhog:latest
-      ports:
-        - 1025
-        - 8025
-
 stack:
   defines: process-group
   version: latest
@@ -274,5 +243,4 @@ stack:
     - /chatwoot/postgres
     - /chatwoot/sidekiq
     - /chatwoot/chatwoot
-    - /chatwoot/mailhog
-    - /chatwoot/nginx
+#    - /chatwoot/nginx
