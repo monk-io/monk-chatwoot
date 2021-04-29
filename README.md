@@ -153,6 +153,7 @@ chatwoot-prod:
     redis-password: my-redis-pass
     sidekiq-auth-username: my-sidekiq-auth-username
     sidekiq-auth-password: my-sidekiq-auth-password
+    server-name: chat.my-domain.io
 ```
 
 ### Logs & Shell
