@@ -1,11 +1,52 @@
 namespace: /chatwoot
 
+common:
+  version: latest
+  metadata:
+    defines: metadata
+    name: Chatwoot
+    description: Open-source live chat software, an alternative to Intercom, Zendesk, Salesforce Service Cloud etc. 🔥💬
+    tags: self hosted, messaging, communication
+    website: www.chatwoot.com
+    source: https://github.com/chatwoot/chatwoot
+    publisher: "monk.io"
+    icon: https://storage.googleapis.com/template_logos/chatwoot-image.png
+    email: maciej@monk.io
+  containers:
+    defines: containers
+    rails:
+      image: chatwoot/chatwoot:latest
+      environment:
+        - NODE_ENV=production
+        - DEFAULT_LOCALE=en
+        - <- `REDIS_URL=redis://${redis-host}:6379`
+        - <- `SECRET_KEY_BASE=${secret-key-base}`
+        - <- `REDIS_URL=redis://${redis-host}:6379`
+        - <- `POSTGRES_HOST=${db-host}`
+        - <- `POSTGRES_USERNAME=${postgres-db-user}`
+        - <- `POSTGRES_PASSWORD=${postgres-db-password}`
+        - <- `SMTP_ADDRESS=${smtp-address}`
+        - <- `SMTP_PORT=${smtp-port}`
+        - <- `SMTP_USERNAME=${smtp-username}`
+        - <- `SMTP_PASSWORD=${smtp-password}`
+        - <- `REDIS_PASSWORD=${redis-password}`
+        - <- `FRONTEND_URL=${server-name}`
+  variables:
+    defines: variables
+    db-host: <- get-hostname("chatwoot/postgres", "postgres")
+    redis-host: <- get-hostname("chatwoot/redis", "redis")
+    chatwoot-url: <- get-hostname("chatwoot/chatwoot", "rails")
+
 nginx:
   defines: runnable
   inherits: /nginx/reverse-proxy-ssl-certbot
   variables:
     defines: variables
     chatwoot-url: <- get-hostname("chatwoot/chatwoot", "rails")
+    ssl: <- $use-ssl
+    server-name: <- $domain
+    email: <- $domain-email
+    proxy-pass-protocol: <- $proxy-protocol
   files:
     defines: files
     server-def:
@@ -70,45 +111,7 @@ nginx:
           }
         } 
         {{ end }}
-
-
-common:
-  version: latest
-  metadata:
-    defines: metadata
-    name: Chatwoot
-    description: Open-source live chat software, an alternative to Intercom, Zendesk, Salesforce Service Cloud etc. 🔥💬
-    tags: self hosted, messaging, communication
-    website: www.chatwoot.com
-    source: https://github.com/chatwoot/chatwoot
-    publisher: "monk.io"
-    icon: https://storage.googleapis.com/template_logos/chatwoot-image.png
-    email: maciej@monk.io
-  containers:
-    defines: containers
-    rails:
-      image: chatwoot/chatwoot:latest
-      environment:
-        - NODE_ENV=production
-        - DEFAULT_LOCALE=en
-        - <- `REDIS_URL=redis://${redis-host}:6379`
-        - <- `SECRET_KEY_BASE=${secret-key-base}`
-        - <- `REDIS_URL=redis://${redis-host}:6379`
-        - <- `POSTGRES_HOST=${db-host}`
-        - <- `POSTGRES_USERNAME=${db-user}`
-        - <- `POSTGRES_PASSWORD=${db-password}`
-        - <- `SMTP_ADDRESS=${smtp-address}`
-        - <- `SMTP_PORT=${smtp-port}`
-        - <- `SMTP_USERNAME=${smtp-username}`
-        - <- `SMTP_PASSWORD=${smtp-password}`
-        - <- `REDIS_PASSWORD=${redis-password}`
-        - <- `FRONTEND_URL=${server-name}`
-  variables:
-    defines: variables
-    db-host: <- get-hostname("chatwoot/postgres", "postgres")
-    redis-host: <- get-hostname("chatwoot/redis", "redis")
-    chatwoot-url: <- get-hostname("chatwoot/chatwoot", "rails")
-
+    
 postgres:
   defines: runnable
   inherits: /postgres/12
@@ -117,6 +120,10 @@ postgres:
     postgres:
       ports:
         - 5432
+  variables:
+    db-user: <- $postgres-db-user
+    db-password: <- $postgres-db-password
+    db-port: <- $postgres-db-port
 
 redis:
   defines: runnable
@@ -199,24 +206,24 @@ stack:
     - /chatwoot/nginx
   variables:
     defines: variables
-    proxy-pass-protocol: http
+    proxy-protocol: http
     chatwoot-port: 3000
-    server-name: chat.yoursite.io
-    email: chat@yoursite.io
-    ssl: true
+    domain: chat.yoursite.io
+    domain-email: chat@yoursite.io
+    use-ssl: true
     rails-env:
       env: RAILS_ENV
       value: production
     secret-key-base:
       env: SECRET_KEY_BASE
       value: 3bsefe45bc938475ecba45075c53cdf0f94299a23f821b05beaf7955b4b0c60ff2b0c66c9047a026578deb5ecadabgs342891be2be68ed123a7b26876d4daddf
-    db-user:
+    postgres-db-user:
       env: POSTGRES_USERNAME
       value: postgres
-    db-password:
+    postgres-db-password:
       env: POSTGRES_PASSWORD
       value: "CHANGE_ME"
-    db-port: 5432
+    postgres-db-port: 5432
     smtp-username:
       env: SMTP_USERNAME
       value: "chat@yoursite.io"
