@@ -142,18 +142,19 @@ chatwoot-prod:
   defines: process-group
   inherits: chatwoot/stack
   variables:
-    server-name: chat.my-domain.io
-    db-user: postgres
-    db-password: my-postgres-pass
-    db-port: 5432
-    smtp-username: chat@my-domain.io
-    smtp-password: my-smtp-pass
-    smtp-port: 1025
+    postgres-db-user: postgres
+    postgres-db-password: my-chatwoot-postgres-pass
+    smtp-username: user-1234
+    smtp-password: secret-pass
+    smtp-port: 2525
     smtp-address: smtp.my-domain.io
-    redis-password: my-redis-pass
-    sidekiq-auth-username: my-sidekiq-auth-username
-    sidekiq-auth-password: my-sidekiq-auth-password
-    server-name: chat.my-domain.io
+    redis-password: my-chatwoot-redis-pass
+    sidekiq-auth-username: my-chatwoot-sidekiq-auth-username
+    sidekiq-auth-password: my-chatwoot-sidekiq-auth-password
+    domain: chat.my-domain.io
+    domain-email: chat@my-domain.io
+    mailer-sender-email: chat@my-domain.io
+
 ```
 
 ### Logs & Shell
