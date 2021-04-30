@@ -25,10 +25,12 @@ common:
         - <- `POSTGRES_HOST=${db-host}`
         - <- `POSTGRES_USERNAME=${postgres-db-user}`
         - <- `POSTGRES_PASSWORD=${postgres-db-password}`
+        - <- `MAILER_SENDER_EMAIL=${mailer-sender-email}`
         - <- `SMTP_ADDRESS=${smtp-address}`
         - <- `SMTP_PORT=${smtp-port}`
         - <- `SMTP_USERNAME=${smtp-username}`
         - <- `SMTP_PASSWORD=${smtp-password}`
+        - <- `SMTP_AUTHENTICATION=${smtp-authentication}`
         - <- `REDIS_PASSWORD=${redis-password}`
         - <- `FRONTEND_URL=${server-name}`
   variables:
@@ -236,6 +238,9 @@ stack:
     smtp-address:
       env: SMTP_ADDRESS
       value: "SMTP_HOST"
+    smtp-authentication:
+      env: SMTP_AUTHENTICATION
+      value: PLAIN
     redis-password:
       env: REDIS_PASSWORD
       value: "CHANGE_ME"
@@ -245,3 +250,6 @@ stack:
     sidekiq-auth-password:
       env: SIDEKIQ_AUTH_PASSWORD
       value: "CHANGE_ME"
+    mailer-sender-email:
+      env: MAILER_SENDER_EMAIL
+      value: "chat@yoursite.io"
