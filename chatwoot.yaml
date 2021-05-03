@@ -31,6 +31,8 @@ common:
         - <- `SMTP_USERNAME=${smtp-username}`
         - <- `SMTP_PASSWORD=${smtp-password}`
         - <- `SMTP_AUTHENTICATION=${smtp-authentication}`
+        - <- `SMTP_ENABLE_STARTTLS_AUTO=${smtp-enable-startttls-auto}`
+        - <- `SMTP_DOMAIN=${smtp-domain}`
         - <- `REDIS_PASSWORD=${redis-password}`
         - <- `FRONTEND_URL=${server-name}`
   variables:
@@ -241,6 +243,12 @@ stack:
     smtp-authentication:
       env: SMTP_AUTHENTICATION
       value: PLAIN
+    smtp-enable-startttls-auto:
+      env: SMTP_ENABLE_STARTTLS_AUTO
+      value: true
+    smtp-domain:
+      env: SMTP_DOMAIN
+      value: "yoursite.io"
     redis-password:
       env: REDIS_PASSWORD
       value: "CHANGE_ME"
