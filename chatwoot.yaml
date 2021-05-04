@@ -34,7 +34,7 @@ common:
         - <- `SMTP_ENABLE_STARTTLS_AUTO=${smtp-enable-startttls-auto}`
         - <- `SMTP_DOMAIN=${smtp-domain}`
         - <- `REDIS_PASSWORD=${redis-password}`
-        - <- `FRONTEND_URL=${server-name}`
+        - <- `FRONTEND_URL=${frontend-url}`
   variables:
     defines: variables
     db-host: <- get-hostname("chatwoot/postgres", "postgres")
@@ -255,3 +255,6 @@ stack:
     mailer-sender-email:
       env: MAILER_SENDER_EMAIL
       value: "chat@yoursite.io"
+    frontend-url:
+      env: FRONTEND_URL
+      value: "https://chat.yoursite.io"
