@@ -11,7 +11,7 @@ common:
     source: https://github.com/chatwoot/chatwoot
     publisher: "monk.io"
     icon: https://storage.googleapis.com/template_logos/chatwoot-image.png
-    email: maciej@monk.io
+    email: hello@chatwoot.com
   containers:
     defines: containers
     rails:
@@ -251,12 +251,6 @@ stack:
       value: "yoursite.io"
     redis-password:
       env: REDIS_PASSWORD
-      value: "CHANGE_ME"
-    sidekiq-auth-username:
-      env: SIDEKIQ_AUTH_USERNAME
-      value: "chat@yoursite.io"
-    sidekiq-auth-password:
-      env: SIDEKIQ_AUTH_PASSWORD
       value: "CHANGE_ME"
     mailer-sender-email:
       env: MAILER_SENDER_EMAIL
