@@ -152,6 +152,7 @@ chatwoot:
     wait-for:
       runnables:
         - chatwoot/postgres
+        - chatwoot/sidekiq
       timeout: 60
   files:
     defines: files
