@@ -91,27 +91,24 @@ The current variables can be found in `chatwoot/stack/variables` section
 ```bash
   variables:
     defines: variables
-    proxy-pass-protocol: http
+    proxy-protocol: http
     chatwoot-port: 3000
-    server-name: chat.yoursite.io
-    email: chat@yoursite.io
-    ssl: true
-    frontend-url:
-      env: FRONTEND_URL
-      value: http://0.0.0.0:3000
+    domain: chat.yoursite.io
+    domain-email: chat@yoursite.io
+    use-ssl: true
     rails-env:
       env: RAILS_ENV
       value: production
     secret-key-base:
       env: SECRET_KEY_BASE
       value: 3bsefe45bc938475ecba45075c53cdf0f94299a23f821b05beaf7955b4b0c60ff2b0c66c9047a026578deb5ecadabgs342891be2be68ed123a7b26876d4daddf
-    db-user:
+    postgres-db-user:
       env: POSTGRES_USERNAME
       value: postgres
-    db-password:
+    postgres-db-password:
       env: POSTGRES_PASSWORD
       value: "CHANGE_ME"
-    db-port: 5432
+    postgres-db-port: 5432
     smtp-username:
       env: SMTP_USERNAME
       value: "chat@yoursite.io"
@@ -124,15 +121,24 @@ The current variables can be found in `chatwoot/stack/variables` section
     smtp-address:
       env: SMTP_ADDRESS
       value: "SMTP_HOST"
+    smtp-authentication:
+      env: SMTP_AUTHENTICATION
+      value: PLAIN
+    smtp-enable-startttls-auto:
+      env: SMTP_ENABLE_STARTTLS_AUTO
+      value: true
+    smtp-domain:
+      env: SMTP_DOMAIN
+      value: "yoursite.io"
     redis-password:
       env: REDIS_PASSWORD
       value: "CHANGE_ME"
-    sidekiq-auth-username:
-      env: SIDEKIQ_AUTH_USERNAME
+    mailer-sender-email:
+      env: MAILER_SENDER_EMAIL
       value: "chat@yoursite.io"
-    sidekiq-auth-password:
-      env: SIDEKIQ_AUTH_PASSWORD
-      value: "CHANGE_ME"
+    frontend-url:
+      env: FRONTEND_URL
+      value: "https://chat.yoursite.io"
 ```
 To override the settings or add new ones for your own template you can inherit it in this way:
 ```bash
@@ -149,8 +155,7 @@ chatwoot-prod:
     smtp-port: 2525
     smtp-address: smtp.my-domain.io
     redis-password: my-chatwoot-redis-pass
-    sidekiq-auth-username: my-chatwoot-sidekiq-auth-username
-    sidekiq-auth-password: my-chatwoot-sidekiq-auth-password
+    frontend-url: https://chat.my-domain.io
     domain: chat.my-domain.io
     domain-email: chat@my-domain.io
     mailer-sender-email: chat@my-domain.io
