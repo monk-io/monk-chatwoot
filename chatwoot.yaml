@@ -35,6 +35,7 @@ common:
         - <- `SMTP_DOMAIN=${smtp-domain}`
         - <- `REDIS_PASSWORD=${redis-password}`
         - <- `FRONTEND_URL=${frontend-url}`
+        - <- `ENABLE_ACCOUNT_SIGNUP=${enable-account-signup}`
   variables:
     defines: variables
     db-host: <- get-hostname("chatwoot/postgres", "postgres")
@@ -138,6 +139,14 @@ redis:
       entrypoint: <- `redis-server --requirepass ${redis-password}`
       ports:
         - 6379
+  checks:
+    defines: checks
+    readyness:
+      code: exec("redis", "/bin/sh", "-c", `redis-cli -a ${redis-password} ping`) "PONG" contains?
+      period: 5
+      initialDelay: 10
+  variables:
+    defines: variables
 
 chatwoot:
   defines: runnable
@@ -153,6 +162,7 @@ chatwoot:
       runnables:
         - chatwoot/postgres
         - chatwoot/sidekiq
+        - chatwoot/redis
       timeout: 60
   files:
     defines: files
@@ -259,3 +269,5 @@ stack:
     frontend-url:
       env: FRONTEND_URL
       value: "https://chat.yoursite.io"
+    enable-account-signup:
+      value: false
