@@ -36,6 +36,8 @@ common:
         - <- `REDIS_PASSWORD=${redis-password}`
         - <- `FRONTEND_URL=${frontend-url}`
         - <- `ENABLE_ACCOUNT_SIGNUP=${enable-account-signup}`
+        - <- `SLACK_CLIENT_ID=${slack-client-id}`
+        - <- `SLACK_CLIENT_SECRET=${slack-client-secret}`
   variables:
     defines: variables
     db-host: <- get-hostname("chatwoot/postgres", "postgres")
@@ -271,3 +273,7 @@ stack:
       value: "https://chat.yoursite.io"
     enable-account-signup:
       value: false
+    slack-client-id:
+      value: ""
+    slack-client-secret:
+      value: ""
