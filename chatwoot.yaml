@@ -40,16 +40,16 @@ common:
         - <- `SLACK_CLIENT_SECRET=${slack-client-secret}`
   variables:
     defines: variables
-    db-host: <- get-hostname("chatwoot/postgres", "postgres")
-    redis-host: <- get-hostname("chatwoot/redis", "redis")
-    chatwoot-url: <- get-hostname("chatwoot/chatwoot", "rails")
+    db-host: <- get-hostname("chatwoot/postgres", "postgres") ".monk" concat
+    redis-host: <- get-hostname("chatwoot/redis", "redis") ".monk" concat
+    chatwoot-url: <- get-hostname("chatwoot/chatwoot", "rails") ".monk" concat
 
 nginx:
   defines: runnable
   inherits: /nginx/reverse-proxy-ssl-certbot
   variables:
     defines: variables
-    chatwoot-url: <- get-hostname("chatwoot/chatwoot", "rails")
+    chatwoot-url: <- get-hostname("chatwoot/chatwoot", "rails") ".monk" concat
     ssl: <- $use-ssl
     server-name: <- $domain
     email: <- $domain-email
@@ -149,6 +149,8 @@ redis:
       initialDelay: 10
   variables:
     defines: variables
+    use-password:
+      value: true
 
 chatwoot:
   defines: runnable
