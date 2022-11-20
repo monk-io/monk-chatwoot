@@ -1,0 +1,2 @@
+REPO chatwoot
+LOAD chatwoot.yml stack.yml

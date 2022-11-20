@@ -1,7 +1,7 @@
 namespace: /chatwoot
 
 common:
-  version: latest
+  version: 1.0
   metadata:
     defines: metadata
     name: Chatwoot

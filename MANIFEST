@@ -1,2 +1,2 @@
-REPO monk-chatwoot 
-LOAD chatwoot.yaml
+REPO monk-chatwoot
+DIR v1 v2
