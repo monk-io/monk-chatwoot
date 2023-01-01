@@ -1,13 +1,16 @@
 # Chatwoot & Monk
+
 This repository contains Monk.io template to deploy Chatwoot & Monk either locally or on cloud of your choice (AWS, GCP, Azure, Digital Ocean).
 
-# Prerequisites
+## Prerequisites
+
 - [Install Monk](https://docs.monk.io/docs/get-monk)
 - [Register and Login Monk](https://docs.monk.io/docs/acc-and-auth)
 - [Add Cloud Provider](https://docs.monk.io/docs/cloud-provider)
 - [Add Instance](https://docs.monk.io/docs/multi-cloud)
 
-#### Make sure monkd is running.
+### Make sure monkd is running
+
 ```bash
 foo@bar:~$ monk status
 daemon: ready
@@ -16,18 +19,20 @@ not connected to cluster
 ```
 
 ## Clone Repository
+
 ```bash
 git clone https://github.com/monk-io/monk-chatwoot
 ```
 
 ## Load Template
+
 ```bash
 cd monk-chatwoot
 monk load MANIFEST
 ```
 
+### Let's take a look at the themes I have installed
 
-#### Let's take a look at the themes I have installed.
 ```bash
 foo@bar:~$ monk list monk-chatwoot
 ✔ Got the list
@@ -39,6 +44,7 @@ group     monk-chatwoot/stack           local       -        -
 ```
 
 ## Deploy Stack
+
 ```bash
 foo@bar:~$ monk run monk-chatwoot/stack
 ? Select tag to run [local/monk-chatwoot/stack] on: monk
@@ -66,11 +72,12 @@ foo@bar:~$ monk run monk-chatwoot/stack
           └─🧩 redis:latest
 
 💡 You can inspect and manage your above stack with these commands:
-	monk logs (-f) local/monk-chatwoot/stack - Inspect logs
-	monk shell     local/monk-chatwoot/stack - Connect to the container's shell
-	monk do        local/monk-chatwoot/stack/action_name - Run defined action (if exists)
+ monk logs (-f) local/monk-chatwoot/stack - Inspect logs
+ monk shell     local/monk-chatwoot/stack - Connect to the container's shell
+ monk do        local/monk-chatwoot/stack/action_name - Run defined action (if exists)
 💡 Check monk help for more!
 ```
+
 ## Check web gui
 
 `http://13.48.58.56:3000/`
@@ -82,13 +89,11 @@ monk do monk-chatwoot/chatwoot-rails/prepare-db
 ```
 
 ## Variables
+
 The variables are in `stack.yml` file. You can quickly setup by editing the values here.
-
-
 
 ## Stop, remove and clean up workloads and templates
 
 ```bash
-monk purge -x -a
+monk purge monk-chatwoot
 ```
-

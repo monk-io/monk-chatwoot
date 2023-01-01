@@ -9,6 +9,13 @@ chatwoot-common:
     website: https://www.chatwoot.com/
     publisher: monk.io
     icon: https://camo.githubusercontent.com/778ffdc9c0cb0bf52e04ffc22f3d392f028ceedc0f60c0e74741aac7c4375eb4/68747470733a2f2f73332e75732d776573742d322e616d617a6f6e6177732e636f6d2f67682d6173736574732e63686174776f6f742e636f6d2f6272616e642e737667
+  connections:
+    database:
+      runnable: monk-chatwoot/chatwoot-db
+      service: db-svc
+    redis:
+      runnable: monk-chatwoot/chatwoot-rds
+      service: redis-svc
   variables:
     chawoot-secret-key:
       env: SECRET_KEY_BASE
@@ -40,7 +47,7 @@ chatwoot-common:
       value: <- `${chatwoot_enable_account}`
     chatwoot_redis_host:
       type: string
-      value: <- get-hostname("monk-chatwoot/chatwoot-rds", "redis") split(".dns.podman") join("")
+      value: <- connection-hostname("redis") split(".dns.podman") join("")
     chatwoot_redis_url:
       type: string
       value: <- `redis://${chatwoot_redis_host}:6379`
@@ -74,7 +81,7 @@ chatwoot-common:
       value: <- `${chatwoot_database}`
     chatwoot_database_host:
       type: string
-      value: <- get-hostname("monk-chatwoot/chatwoot-db", "db") split(".dns.podman") join("")
+      value: <- connection-hostname("database") split(".dns.podman") join("")
     chatwoot-database-host:
       env: POSTGRES_HOST
       type: string
@@ -329,6 +336,11 @@ chatwoot-db:
         - <- `POSTGRES_DB=${chatwoot_database}`
         - <- `POSTGRES_USER=${chatwoot_database_user}`
         - <- `POSTGRES_PASSWORD=${chatwoot_database_password}`
+  services:
+    db-svc:
+      port: 5432
+      container: db
+      protocol: tcp
         
     
 chatwoot-rds:
@@ -337,4 +349,9 @@ chatwoot-rds:
     redis:
       image: redis
       bash: <- `redis-server --requirepass "${chatwoot_redis_password}"`
+  services:
+    redis-svc:
+      port: 6379
+      container: redis
+      protocol: tcp
 
