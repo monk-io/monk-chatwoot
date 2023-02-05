@@ -1,12 +1,12 @@
-namespace: monk-chatwoot
+namespace: chatwoot
 
 stack:
   defines: process-group
   runnable-list:
-    - monk-chatwoot/chatwoot-rds
-    - monk-chatwoot/chatwoot-db
-    - monk-chatwoot/chatwoot-rails
-    - monk-chatwoot/chatwoot-sidekiq
+    - chatwoot/chatwoot-rds
+    - chatwoot/chatwoot-db
+    - chatwoot/chatwoot-rails
+    - chatwoot/chatwoot-sidekiq
   variables:
     chatwoot_secret_key:
       type: string

@@ -21,60 +21,60 @@ not connected to cluster
 ## Clone Repository
 
 ```bash
-git clone https://github.com/monk-io/monk-chatwoot
+git clone https://github.com/monk-io/chatwoot
 ```
 
 ## Load Template
 
 ```bash
-cd monk-chatwoot
+cd chatwoot
 monk load MANIFEST
 ```
 
 ### Let's take a look at the themes I have installed
 
 ```bash
-foo@bar:~$ monk list monk-chatwoot
+foo@bar:~$ monk list chatwoot
 ✔ Got the list
 Type      Template                      Repository  Version  Tags
-runnable  monk-chatwoot/chatwoot-db     local       -        -
-runnable  monk-chatwoot/chatwoot-rails  local       -        -
-runnable  monk-chatwoot/chatwoot-rds    local       -        -
-group     monk-chatwoot/stack           local       -        -
+runnable  chatwoot/chatwoot-db     local       -        -
+runnable  chatwoot/chatwoot-rails  local       -        -
+runnable  chatwoot/chatwoot-rds    local       -        -
+group     chatwoot/stack           local       -        -
 ```
 
 ## Deploy Stack
 
 ```bash
-foo@bar:~$ monk run monk-chatwoot/stack
-? Select tag to run [local/monk-chatwoot/stack] on: monk
-✔ Starting the job: local/monk-chatwoot/stack... DONE
+foo@bar:~$ monk run chatwoot/stack
+? Select tag to run [local/chatwoot/stack] on: monk
+✔ Starting the job: local/chatwoot/stack... DONE
 ✔ Preparing nodes DONE
 ✔ Checking/pulling images...
 ✔ [================================================] 100% chatwoot/chatwoot:latest monk-1
 ✔ [================================================] 100% redis:latest monk-2
 ✔ [================================================] 100% postgres:latest monk-1
 ✔ Checking/pulling images DONE
-✔ Started local/monk-chatwoot/stack
+✔ Started local/chatwoot/stack
 
-🔩 templates/local/monk-chatwoot/stack
+🔩 templates/local/chatwoot/stack
  ├─🧊 Peer monk-1
- │  ├─🔩 templates/local/monk-chatwoot/chatwoot-db
- │  │  └─📦 9c5c2c7ed9087d7008ffafe8c988b9d4-l-monk-chatwoot-chatwoot-db-db
+ │  ├─🔩 templates/local/chatwoot/chatwoot-db
+ │  │  └─📦 9c5c2c7ed9087d7008ffafe8c988b9d4-l-chatwoot-chatwoot-db-db
  │  │     └─🧩 postgres:latest
- │  └─🔩 templates/local/monk-chatwoot/chatwoot-rails
+ │  └─🔩 templates/local/chatwoot/chatwoot-rails
  │     └─📦 957bf05f242e228aa74f518941c82f9d--chatwoot-chatwoot-rails-rails
  │        ├─🧩 chatwoot/chatwoot:latest
  │        └─🔌 open 13.48.58.56:3000 (127.0.0.1:3000) -> 3000
  └─🧊 Peer monk-2
-    └─🔩 templates/local/monk-chatwoot/chatwoot-rds
+    └─🔩 templates/local/chatwoot/chatwoot-rds
        └─📦 2ecfc2c225f552b1de79290f252dbff8-nk-chatwoot-chatwoot-rds-redis
           └─🧩 redis:latest
 
 💡 You can inspect and manage your above stack with these commands:
- monk logs (-f) local/monk-chatwoot/stack - Inspect logs
- monk shell     local/monk-chatwoot/stack - Connect to the container's shell
- monk do        local/monk-chatwoot/stack/action_name - Run defined action (if exists)
+ monk logs (-f) local/chatwoot/stack - Inspect logs
+ monk shell     local/chatwoot/stack - Connect to the container's shell
+ monk do        local/chatwoot/stack/action_name - Run defined action (if exists)
 💡 Check monk help for more!
 ```
 
@@ -85,7 +85,7 @@ foo@bar:~$ monk run monk-chatwoot/stack
 ## Setup Database
 
 ```bash
-monk do monk-chatwoot/chatwoot-rails/prepare-db
+monk do chatwoot/chatwoot-rails/prepare-db
 ```
 
 ## Variables
@@ -95,5 +95,5 @@ The variables are in `stack.yml` file. You can quickly setup by editing the valu
 ## Stop, remove and clean up workloads and templates
 
 ```bash
-monk purge monk-chatwoot
+monk purge chatwoot
 ```

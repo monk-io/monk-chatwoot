@@ -1,4 +1,4 @@
-namespace: monk-chatwoot
+namespace: chatwoot
 
 chatwoot-common:
   version: 2.0
@@ -11,10 +11,10 @@ chatwoot-common:
     icon: https://camo.githubusercontent.com/778ffdc9c0cb0bf52e04ffc22f3d392f028ceedc0f60c0e74741aac7c4375eb4/68747470733a2f2f73332e75732d776573742d322e616d617a6f6e6177732e636f6d2f67682d6173736574732e63686174776f6f742e636f6d2f6272616e642e737667
   connections:
     database:
-      runnable: monk-chatwoot/chatwoot-db
+      runnable: chatwoot/chatwoot-db
       service: db-svc
     redis:
-      runnable: monk-chatwoot/chatwoot-rds
+      runnable: chatwoot/chatwoot-rds
       service: redis-svc
   variables:
     chawoot-secret-key:
@@ -290,7 +290,7 @@ chatwoot-sidekiq:
     defines: depends
     wait-for:
         runnables:
-            - monk-chatwoot/chatwoot-rds
+            - chatwoot/chatwoot-rds
         timeout: 60
   containers:
     rails:
