@@ -328,6 +328,9 @@ chatwoot-sidekiq:
           :concurrency: 5
    
 chatwoot-db:
+  metadata:
+    private: true
+
   defines: runnable
   containers:
     db:
@@ -344,6 +347,9 @@ chatwoot-db:
         
     
 chatwoot-rds:
+  metadata:
+    private: true
+
   defines: runnable
   containers:
     redis:
