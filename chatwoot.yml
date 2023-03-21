@@ -349,7 +349,6 @@ chatwoot-db:
 chatwoot-rds:
   metadata:
     private: true
-
   defines: runnable
   containers:
     redis:
