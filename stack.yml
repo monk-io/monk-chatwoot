@@ -1,7 +1,26 @@
+---
 namespace: chatwoot
 
 stack:
   defines: process-group
+  metadata:
+    name: chatwoot
+    shortname: Chatwoot
+    description: |
+      Chatwoot is a powerful and intuitive customer engagement platform that enables businesses to communicate with their customers seamlessly across multiple channels.
+
+      With Chatwoot, businesses can manage all their customer conversations in one place, including email, social media, and messaging apps. The platform offers a range of features, including automated responses, chatbots, and real-time analytics, to help businesses improve their customer experience and increase customer satisfaction.
+
+      Chatwoot is easy to set up and use, making it an ideal solution for businesses of all sizes looking to streamline their customer
+      engagement processes.
+
+      To start properly you need to run custom action: `monk do chatwoot/chatwoot-rails/prepare-db`
+    website: https://www.chatwoot.com/
+    publisher: monk.io
+    icon: https://camo.githubusercontent.com/778ffdc9c0cb0bf52e04ffc22f3d392f028ceedc0f60c0e74741aac7c4375eb4/68747470733a2f2f73332e75732d776573742d322e616d617a6f6e6177732e636f6d2f67682d6173736574732e63686174776f6f742e636f6d2f6272616e642e737667
+    version: 2.0
+    source: https://github.com/chatwoot/chatwoot
+    tags: customer engagement, customer support, chatbot, omnichannel, CRM, helpdesk, livechat, ticketing, socialmedia, teamcollaboration
   runnable-list:
     - chatwoot/chatwoot-rds
     - chatwoot/chatwoot-db

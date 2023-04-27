@@ -1,14 +1,26 @@
+---
 namespace: chatwoot
 
 chatwoot-common:
-  version: 2.0
   metadata:
-    defines: metadata
-    name: Chatwoot
-    description: Chatwoot is an open-source as well as cloud-based customer engagement platform. Manage all of your customer conversation channels from one place.
+    name: chatwoot
+    shortname: Chatwoot
+    description: |
+      Chatwoot is a powerful and intuitive customer engagement platform that enables businesses to communicate with their customers seamlessly across multiple channels.
+
+      With Chatwoot, businesses can manage all their customer conversations in one place, including email, social media, and messaging apps. The platform offers a range of features, including automated responses, chatbots, and real-time analytics, to help businesses improve their customer experience and increase customer satisfaction.
+
+      Chatwoot is easy to set up and use, making it an ideal solution for businesses of all sizes looking to streamline their customer
+      engagement processes.
+
+      To start properly you need to run custom action: `monk do chatwoot/chatwoot-rails/prepare-db`
     website: https://www.chatwoot.com/
     publisher: monk.io
     icon: https://camo.githubusercontent.com/778ffdc9c0cb0bf52e04ffc22f3d392f028ceedc0f60c0e74741aac7c4375eb4/68747470733a2f2f73332e75732d776573742d322e616d617a6f6e6177732e636f6d2f67682d6173736574732e63686174776f6f742e636f6d2f6272616e642e737667
+    version: 2.0
+    source: https://github.com/chatwoot/chatwoot
+    tags: customer engagement, customer support, chatbot, omnichannel, CRM, helpdesk, livechat, ticketing, socialmedia, teamcollaboration
+    private: true
   connections:
     database:
       runnable: chatwoot/chatwoot-db
@@ -264,13 +276,13 @@ chatwoot-common:
       value: <- `${chatwoot_direct_uploads_enabled}`
 
 chatwoot-rails:
-  inherits: ./chatwoot-common
+  inherits: chatwoot/chatwoot-common
   defines: runnable
   containers:
     rails:
       image: chatwoot/chatwoot
       ports:
-        - '0.0.0.0:3000:3000'
+        - 0.0.0.0:3000:3000
       entrypoint: docker/entrypoints/rails.sh
       bash: <- `bundle exec rails s -p 3000 -b 0.0.0.0`
       environment:
@@ -278,26 +290,23 @@ chatwoot-rails:
         - RAILS_ENV=production
         - INSTALLATION_ENV=docker
   actions:
-    defines: actions
     prepare-db:
-      code: exec("rails", "/bin/sh", "-c", `bundle exec rake db:chatwoot_prepare`)
+      code: exec("rails", "/bin/sh", "-c", `/app/docker/entrypoints/rails.sh bundle exec rake db:chatwoot_prepare`)
       description: Prepare database
 
 chatwoot-sidekiq:
   defines: runnable
-  inherits: ./chatwoot-common
+  inherits: chatwoot/chatwoot-common
   depends:
-    defines: depends
     wait-for:
-        runnables:
-            - chatwoot/chatwoot-rds
-        timeout: 60
+      runnables:
+        - chatwoot/chatwoot-rds
+      timeout: 60
   containers:
     rails:
       image: chatwoot/chatwoot
       bash: <- `bundle exec sidekiq -C /config/sidekiq.yml`
   files:
-    defines: files
     sidekiq-conf:
       path: /config/sidekiq.yml
       container: rails
@@ -305,7 +314,7 @@ chatwoot-sidekiq:
         :verbose: false
         :concurrency: 5
         :timeout: 25
-        
+
         :queues:
           - [low, 1]
           - [scheduled_jobs, 1]
@@ -321,17 +330,16 @@ chatwoot-sidekiq:
           - [action_mailbox_routing, 3]
           - [high, 5]
           - [critical, 10]
-          
+
         production:
           :concurrency: 10
         staging:
           :concurrency: 5
-   
+
 chatwoot-db:
+  defines: runnable
   metadata:
     private: true
-
-  defines: runnable
   containers:
     db:
       image: postgres
@@ -344,12 +352,11 @@ chatwoot-db:
       port: 5432
       container: db
       protocol: tcp
-        
-    
+
 chatwoot-rds:
+  defines: runnable
   metadata:
     private: true
-  defines: runnable
   containers:
     redis:
       image: redis
@@ -359,4 +366,3 @@ chatwoot-rds:
       port: 6379
       container: redis
       protocol: tcp
-
