@@ -43,10 +43,10 @@ stack:
       type: string
       value: ''
     chatwoot_force_ssl:
-      type: bool
+      type: string
       value: false
     chatwoot_enable_account:
-      type: bool
+      type: string
       value: false
     chatwoot_redis_password:
       type: string
@@ -75,7 +75,7 @@ stack:
     chatwoot_rails_env:
       env: RAILS_ENV
       type: string
-      value: <- `${chatwoot_rails_env}`
+      value: production
     chatwoot_rails_max_threads:
       env: RAILS_MAX_THREADS
       type: int
@@ -101,7 +101,7 @@ stack:
       type: string
       value: ''
     chatwoot_enable_starttls_auto:
-      type: bool
+      type: string
       value: true
     chatwoot_openssl_verify:
       type: string
@@ -147,7 +147,7 @@ stack:
       value: ''
     chatwoot_rails_log_to_stdout:
       env: RAILS_LOG_TO_STDOUT
-      type: bool
+      type: string
       value: true
     chatwoot_log_level:
       type: string
@@ -197,7 +197,7 @@ stack:
       value: AC:73:8E:DE:EB:56:EA:CC:10:87:02:A7:65:37:7B:38:D4:5D:D4:53:F8:3B:FB:D3:C6:28:64:1D:AA:08:1E:D8
     chatwoot_use_inbox_avatar_forbot:
       env: USE_INBOX_AVATAR_FOR_BOT
-      type: bool
+      type: string
       value: true
     chatwoot_ios_app_identifier:
       env: IOS_APP_IDENTIFIER
@@ -205,8 +205,8 @@ stack:
       value: ''
     chatwoot_enable_push_relay_server:
       env: ENABLE_PUSH_RELAY_SERVER
-      type: bool
-      value: <- `${chatwoot_enable_push_relay_server}`
+      type: string
+      value: true
     chatwoot_stripe_secret_key:
       env: STRIPE_SECRET_KEY
       type: string
@@ -217,5 +217,5 @@ stack:
       value: ''
     chatwoot_direct_uploads_enabled:
       env: DIRECT_UPLOADS_ENABLED
-      type: bool
+      type: string
       value: true
