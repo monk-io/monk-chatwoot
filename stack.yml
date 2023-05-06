@@ -14,6 +14,10 @@ stack:
       Chatwoot is easy to set up and use, making it an ideal solution for businesses of all sizes looking to streamline their customer
       engagement processes.
 
+      ---
+
+      Notes:
+
       To start properly you need to run custom action: `monk do chatwoot/chatwoot-rails/prepare-db`
     website: https://www.chatwoot.com/
     publisher: monk.io
