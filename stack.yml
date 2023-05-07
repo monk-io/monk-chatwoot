@@ -18,7 +18,7 @@ stack:
 
       Notes:
 
-      To start properly you need to run custom action: `monk do chatwoot/chatwoot-rails/prepare-db`
+      To start properly you need to run custom action in `chatwoot-rails` runnable: `prepare-db`
     website: https://www.chatwoot.com/
     publisher: monk.io
     icon: https://camo.githubusercontent.com/778ffdc9c0cb0bf52e04ffc22f3d392f028ceedc0f60c0e74741aac7c4375eb4/68747470733a2f2f73332e75732d776573742d322e616d617a6f6e6177732e636f6d2f67682d6173736574732e63686174776f6f742e636f6d2f6272616e642e737667
