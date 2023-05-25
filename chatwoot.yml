@@ -23,7 +23,7 @@ chatwoot-common:
     icon: https://camo.githubusercontent.com/778ffdc9c0cb0bf52e04ffc22f3d392f028ceedc0f60c0e74741aac7c4375eb4/68747470733a2f2f73332e75732d776573742d322e616d617a6f6e6177732e636f6d2f67682d6173736574732e63686174776f6f742e636f6d2f6272616e642e737667
     version: 2.0
     source: https://github.com/chatwoot/chatwoot
-    tags: customer engagement, customer support, chatbot, omnichannel, CRM, helpdesk, livechat, ticketing, socialmedia, teamcollaboration
+    tags: chatbot, ticketing, livechat, crm, socialmedia, helpdesk, customer engagement, omnichannel, customer support, teamcollaboration
     private: true
   connections:
     database:
@@ -352,7 +352,7 @@ chatwoot-db:
     source: https://github.com/postgres
     publisher: monk.io
     icon: https://www.postgresql.org/media/img/about/press/elephant.png
-    tags: PostgreSQL, database management system, open-source, object-relational, data types, indexing, query optimization, security, MVCC, community, Linux, Windows, macOS, programming languages, frameworks
+    tags: frameworks, object-relational, indexing, data types, query optimization, postgresql, security, open-source, mvcc, community
     description: |
       PostgreSQL is a powerful open-source object-relational database management system (DBMS) that provides robustness, reliability, and performance to meet the demanding needs of enterprise-level applications. It was first released in 1989 and has since become one of the most popular and widely used relational databases in the world.
 
@@ -396,7 +396,7 @@ chatwoot-rds:
     source: https://github.com/redis/redis
     license: BSD-3-Clause license
     private: true
-    tags: Redis, In-memory Database, Key-value Store, Data Structures, NoSQL, Caching, Pub/Sub, Performance, Scalability, High Availability, Replication, Persistence, Distributed Systems, Memory Optimization, Open Source
+    tags: data structures, high availability, persistence, in-memory database, redis, scalability, key-value store, caching, nosql, pub/sub, performance, memory optimization, replication, open source
     version: 1.0
     private: true
   containers:
