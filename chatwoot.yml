@@ -398,7 +398,6 @@ chatwoot-rds:
     private: true
     tags: data structures, high availability, persistence, in-memory database, redis, scalability, key-value store, caching, nosql, pub/sub, performance, memory optimization, replication, open source
     version: 1.0
-    private: true
   containers:
     redis:
       image: redis
