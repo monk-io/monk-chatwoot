@@ -1,0 +1,289 @@
+---
+title: Chatwoot
+description: Ready-to-run Chatwoot container stack you can run directly or inherit to integrate a customer engagement platform into your infrastructure.
+primary_category: communication
+tags: [chatwoot, customer-support, chat, template, runnable, stack, messaging, helpdesk]
+integration_type: template
+hosting_models: [self-hosted]
+website_url: https://www.chatwoot.com/
+docs_url: https://www.chatwoot.com/docs/
+publisher: monk.io
+---
+
+## Overview
+
+This template provides a production‑ready Chatwoot stack as a Monk runnable. You can:
+
+- Run it directly to get a managed Chatwoot deployment with all necessary components
+- Inherit it in your own stack to seamlessly add customer engagement and support chat capabilities
+
+Chatwoot is an open-source customer engagement platform that allows you to manage conversations across multiple channels including website chat, email, Facebook, Twitter, WhatsApp, and more. It provides automated responses, chatbots, real-time analytics, and multi-channel support to help businesses improve customer experience.
+
+## What this template manages
+
+- Chatwoot Rails application (web interface and API)
+- Chatwoot Sidekiq (background job processing)
+- PostgreSQL database (data storage)
+- Redis (caching and background jobs)
+- Database initialization and migration
+- Network services and internal connectivity
+
+## Quick start (run directly)
+
+1) Load templates
+
+```bash
+monk load MANIFEST
+```
+
+2) Run Chatwoot stack with defaults
+
+```bash
+monk run chatwoot/stack
+```
+
+3) Setup database
+
+After the stack is running, initialize the database:
+
+```bash
+monk do chatwoot/chatwoot-rails/prepare-db
+```
+
+4) Access the web interface
+
+Once the database is prepared, access the Chatwoot web interface at `http://localhost:3000` and complete the initial setup wizard to create your admin account.
+
+5) Customize configuration (recommended via inheritance)
+
+Running directly uses the defaults defined in this template's `variables`. Secrets added with `monk secrets add` will not affect this runnable unless you inherit it and reference those secrets.
+
+- Preferred: inherit and replace variables with `secret("...")` as shown below.
+- Alternative: fork/clone and edit the `variables` in `stack.yml`, then `monk load MANIFEST` and run.
+
+## Configuration
+
+Key variables you can customize in this template:
+
+```yaml
+variables:
+  # Application settings
+  chatwoot_secret_key: "replace_with_lengthy_secure_hex"
+  chatwoot_frontend_url: "http://0.0.0.0:3000"
+  chatwoot_helpcenter_url: "http://0.0.0.0:3000"
+  chatwoot_default_locale: "en"
+  chatwoot_force_ssl: false
+  chatwoot_enable_account: false  # Enable public signup
+
+  # Database settings
+  chatwoot_database: "monk"
+  chatwoot_database_user: "monk"
+  chatwoot_database_password: "monk"
+
+  # Redis settings
+  chatwoot_redis_password: ""
+
+  # Email/SMTP settings
+  chatwoot_mail_sender: "Chatwoot <accounts@monk.io>"
+  chatwoot_smtp_domain: "monk.io"
+  chatwoot_smtp_address: "mailhog"
+  chatwoot_smtp_user: ""
+  chatwoot_smtp_password: ""
+  chatwoot_smtp_authentication: ""
+
+  # Storage settings
+  chatwoot_active_storage_service: "local"  # or "amazon" for S3
+  chatwoot_s3_bucket_name: ""
+  chatwoot_aws_access_key_id: ""
+  chatwoot_aws_secret_access_key: ""
+  chatwoot_aws_region: ""
+
+  # Social media integrations (optional)
+  chatwoot_fb_app_id: ""
+  chatwoot_fb_app_secret: ""
+  chatwoot_twitter_consumer_key: ""
+  chatwoot_twitter_consumer_secret: ""
+  chatwoot_slack_client_id: ""
+  chatwoot_slack_client_secret: ""
+```
+
+**Important:** Change `chatwoot_secret_key` to a secure random string (64+ hex characters) before production use.
+
+## Stack components
+
+The Chatwoot stack includes the following runnables:
+
+- `chatwoot-rails` - Rails application server (port 3000)
+- `chatwoot-sidekiq` - Background job processor
+- `chatwoot-db` - PostgreSQL database server
+- `chatwoot-rds` - Redis cache and job queue
+
+## Ports and connectivity
+
+- Web interface and API: port `3000`
+- PostgreSQL: internal only (port 5432)
+- Redis: internal only (port 6379)
+
+From other runnables in the same process group, use `connection-hostname("<connection-name>")` to resolve service hosts.
+
+## Use by inheritance (recommended for apps)
+
+Inherit the Chatwoot stack in your customer engagement infrastructure and configure with secrets. Example:
+
+```yaml
+namespace: myapp
+
+support:
+  defines: process-group
+  runnable-list:
+    - myapp/chatwoot-custom
+
+chatwoot-custom:
+  defines: runnable
+  inherits: chatwoot/stack
+  variables:
+    chatwoot_secret_key:
+      value: <- secret("chatwoot-secret-key")
+    chatwoot_frontend_url:
+      value: <- secret("chatwoot-frontend-url")
+    chatwoot_database_password:
+      value: <- secret("chatwoot-db-password")
+    chatwoot_smtp_address:
+      value: <- secret("smtp-address")
+    chatwoot_smtp_user:
+      value: <- secret("smtp-user")
+    chatwoot_smtp_password:
+      value: <- secret("smtp-password")
+```
+
+Then set the secrets once and run your stack:
+
+```bash
+# Generate a secure secret key (64 hex characters)
+monk secrets add -g chatwoot-secret-key="$(openssl rand -hex 32)"
+monk secrets add -g chatwoot-frontend-url="https://chat.yourdomain.com"
+monk secrets add -g chatwoot-db-password="STRONG_DB_PASSWORD"
+monk secrets add -g smtp-address="smtp.sendgrid.net"
+monk secrets add -g smtp-user="apikey"
+monk secrets add -g smtp-password="YOUR_SENDGRID_API_KEY"
+
+# Run the stack
+monk run myapp/support
+
+# Initialize the database
+monk do myapp/chatwoot-custom/chatwoot-rails/prepare-db
+```
+
+## Database setup
+
+After deploying the stack, you **must** run the database preparation action:
+
+```bash
+monk do chatwoot/chatwoot-rails/prepare-db
+```
+
+This action will:
+- Create the database schema
+- Run all migrations
+- Set up initial data structures
+- Prepare the application for first use
+
+**Note:** This step is required only once during initial setup. Subsequent deployments will use the existing database.
+
+## Email configuration
+
+For production use, configure SMTP settings to enable:
+- User invitations and password resets
+- Email notifications
+- Email channel support
+
+Common SMTP providers:
+- **SendGrid:** `smtp.sendgrid.net` (port 587, TLS)
+- **AWS SES:** `email-smtp.REGION.amazonaws.com`
+- **Mailgun:** `smtp.mailgun.org`
+- **Gmail:** `smtp.gmail.com` (use App Password)
+
+## Storage configuration
+
+By default, Chatwoot stores attachments locally. For production, configure S3-compatible storage:
+
+```yaml
+chatwoot_active_storage_service: "amazon"
+chatwoot_s3_bucket_name: "your-chatwoot-bucket"
+chatwoot_aws_access_key_id: "<- secret('aws-access-key')"
+chatwoot_aws_secret_access_key: "<- secret('aws-secret-key')"
+chatwoot_aws_region: "us-east-1"
+```
+
+## Social media integrations
+
+Configure social media channels by setting the appropriate API credentials:
+
+**Facebook/Instagram:**
+```yaml
+chatwoot_fb_app_id: "YOUR_FB_APP_ID"
+chatwoot_fb_app_secret: "YOUR_FB_APP_SECRET"
+chatwoot_fb_verify_token: "YOUR_VERIFY_TOKEN"
+chatwoot_ig_verify_token: "YOUR_IG_VERIFY_TOKEN"
+```
+
+**Twitter:**
+```yaml
+chatwoot_twitter_consumer_key: "YOUR_CONSUMER_KEY"
+chatwoot_twitter_consumer_secret: "YOUR_CONSUMER_SECRET"
+```
+
+**Slack:**
+```yaml
+chatwoot_slack_client_id: "YOUR_CLIENT_ID"
+chatwoot_slack_client_secret: "YOUR_CLIENT_SECRET"
+```
+
+## Related templates
+
+- See other templates in this repository for complementary services
+- Combine with monitoring tools (`prometheus-grafana/`) for observability
+- Integrate with reverse proxy (`nginx/`) for SSL termination
+- Add email service (`mailhog/`) for development testing
+
+## Troubleshooting
+
+- **Database connection errors:** Ensure PostgreSQL is running and accepting connections. Check that `chatwoot_database_password` matches between the stack and database variables.
+
+- **Redis connection errors:** Verify Redis is running and accessible. If using Redis password authentication, ensure `chatwoot_redis_password` is correctly set.
+
+- **Missing `prepare-db` action:** Make sure to run the database preparation action after first deployment:
+
+```bash
+monk do chatwoot/chatwoot-rails/prepare-db
+```
+
+- **Port conflicts:** Ensure port 3000 is available on your host. Change the `host-port` in `chatwoot-rails` if needed.
+
+- **Check logs** for any component:
+
+```bash
+monk logs -l 500 -f chatwoot/stack
+monk logs -l 500 -f chatwoot/chatwoot-rails
+monk logs -l 500 -f chatwoot/chatwoot-sidekiq
+monk logs -l 500 -f chatwoot/chatwoot-db
+```
+
+- **Initialization issues:** If you encounter problems during setup, try purging and restarting:
+
+```bash
+monk purge chatwoot
+monk run chatwoot/stack
+monk do chatwoot/chatwoot-rails/prepare-db
+```
+
+- **Background jobs not processing:** Check that Sidekiq is running properly:
+
+```bash
+monk logs -l 500 -f chatwoot/chatwoot-sidekiq
+```
+
+- **Email not working:** Verify SMTP settings are correct and the SMTP server is reachable from your Monk cluster. Test with a simple email notification from Chatwoot.
+
+- **Startup order:** The stack ensures proper startup order with dependencies. PostgreSQL and Redis start before the Rails application and Sidekiq workers.
+
